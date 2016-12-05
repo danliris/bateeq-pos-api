@@ -7,6 +7,8 @@ var ObjectId = require('mongodb').ObjectId;
 
 const apiVersion = '1.0.0';
 
+
+// getAllSalesByVoidFalseReturFalse
 router.get('/', (request, response, next) => {
     db.get().then(db => {
         var manager = new SalesManager(db, {
@@ -58,7 +60,40 @@ router.get('/:id', (request, response, next) => {
 
     })
 });
- 
+
+// getAllSalesByVoidFalse
+router.get('/:void/:storeName', (request, response, next) => {
+    db.get().then(db => {
+        var manager = new SalesManager(db, {
+            username: 'router'
+        });
+
+        var storeName = request.params.storeName;
+        var query = request.query;
+        query.filter = {
+             'store.name': storeName,
+            'isVoid' : false,
+        }
+        
+        query.order = {
+            '_updatedDate' : -1
+        }
+        
+        manager.read(query)
+            .then(docs => {
+                var result = resultFormatter.ok(apiVersion, 200, docs.data);
+                delete docs.data;
+                result.info = docs;
+                response.send(200, result);
+            })
+            .catch(e => {
+                var error = resultFormatter.fail(apiVersion, 400, e);
+                response.send(400, error);
+            })
+
+    })
+});
+
 //getAllSalesByFilter
 router.get('/:storeid/:datefrom/:dateto/:shift', (request, response, next) => {
     db.get().then(db => {

@@ -7,6 +7,8 @@ var ObjectId = require('mongodb').ObjectId;
 
 const apiVersion = '1.0.0';
 
+
+// getAllSalesByVoidTrue -> list void & reference
 router.get('/', (request, response, next) => {
     db.get().then(db => {
         var manager = new SalesManager(db, {
@@ -28,6 +30,10 @@ router.get('/', (request, response, next) => {
 
         query.filter = { '$and': [filterCode, filter] };
 
+        
+        query.order = {
+            '_updatedDate' : -1
+        }
         manager.read(query)
             .then(docs => {
                 var result = resultFormatter.ok(apiVersion, 200, docs.data);
@@ -96,7 +102,7 @@ router.get('/:datefrom/:dateto', (request, response, next) => {
     })
 });
 
-
+//getAllSalesByVoidTrue -> report void sales
 router.get('/:storename/:datefrom/:dateto/:shift', (request, response, next) => {
     db.get().then(db => {
         var manager = new SalesManager(db, {
